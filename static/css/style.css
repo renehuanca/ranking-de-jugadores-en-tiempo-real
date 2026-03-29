@@ -1,0 +1,25 @@
+#ranking-container {
+    position: relative;
+}
+
+.ranking-card {
+    position: relative;
+    transition: transform 0.35s ease, background-color 0.35s ease, opacity 0.35s ease;
+}
+
+.ranking-card.moved-up {
+    background-color: rgba(46, 125, 50, 0.12);
+}
+
+.ranking-card.moved-down {
+    background-color: rgba(198, 40, 40, 0.12);
+}
+
+.ranking-card:not(.moved-up):not(.moved-down) {
+    background-color: #ffffff;
+}
+
+.ranking-card .badge {
+    min-width: 70px;
+    text-align: center;
+}

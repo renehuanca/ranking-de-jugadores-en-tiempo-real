@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4 shadow-sm border-0" style="max-width: 600px;">
+    <h2 class="mb-4 fs-3">Agregar Jugador</h2>
+
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nickname</label>
+            <input type="text" name="nickname" class="form-control" required>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="/players" class="btn btn-light border ms-2">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

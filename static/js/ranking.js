@@ -7,7 +7,7 @@ function createCard(player, score, position) {
     card.innerHTML = `
         <div class="fw-bold">#${position}</div>
         <div class="flex-grow-1 ms-3">${player}</div>
-        <div class="badge bg-primary fs-6">${score} pts</div>`;
+        <div class="badge bg-primary fs-6">${score} puntos</div>`;
     return card;
 }
 
@@ -31,7 +31,7 @@ function updateRankingList(data) {
 
         if (existing) {
             existing.querySelector('.fw-bold').textContent = `#${position}`;
-            existing.querySelector('.badge').textContent = `${score} pts`;
+            existing.querySelector('.badge').textContent = `${score} puntos`;
             return existing;
         }
 

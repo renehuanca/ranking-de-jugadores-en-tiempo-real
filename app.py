@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from models import db, Player
+from models import db, Jugador
 import redis as redis_lib
 from flask_socketio import SocketIO, emit
 
@@ -23,70 +23,70 @@ def home():
     ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
     return render_template("ranking.html", ranking=ranking)
 
-@app.route("/players")
-def players():
-    players = Player.query.all()
-    return render_template("players.html", players=players)
+@app.route("/jugadores")
+def jugadores():
+    jugadores = Jugador.query.all()
+    return render_template("jugadores.html", jugadores=jugadores)
 
-@app.route("/players/add", methods=["GET", "POST"])
-def add_player():
+@app.route("/jugadores/agregar", methods=["GET", "POST"])
+def agregar_jugador():
     if request.method == "POST":
-        name = request.form["name"]
+        nombre = request.form["nombre"]
         nickname = request.form["nickname"]
 
-        player = Player(name=name, nickname=nickname)
-        db.session.add(player)
+        jugador = Jugador(nombre=nombre, nickname=nickname)
+        db.session.add(jugador)
         db.session.commit()
 
         # Redis
         redis.zadd("ranking", {nickname: 0})
-        redis.hset(f"player:{player.id}", mapping={
-            "name": name,
+        redis.hset(f"player:{jugador.id}", mapping={
+            "nombre": nombre,
             "nickname": nickname
         })
 
-        return redirect(url_for("players"))
+        return redirect(url_for("jugadores"))
 
-    return render_template("add_player.html")
+    return render_template("agregar_jugador.html")
 
 
-@app.route("/players/edit/<int:id>", methods=["GET", "POST"])
-def edit_player(id):
-    player = Player.query.get_or_404(id)
+@app.route("/jugadores/editar/<int:id>", methods=["GET", "POST"])
+def editar_jugador(id):
+    jugador = Jugador.query.get_or_404(id)
 
     if request.method == "POST":
-        player.name = request.form["name"]
-        player.nickname = request.form["nickname"]
+        jugador.nombre = request.form["nombre"]
+        jugador.nickname = request.form["nickname"]
         db.session.commit()
 
         # Redis
-        redis.hset(f"player:{player.id}", mapping={
-            "name": player.name,
-            "nickname": player.nickname
+        redis.hset(f"player:{jugador.id}", mapping={
+            "nombre": jugador.nombre,
+            "nickname": jugador.nickname
         })
 
-        return redirect(url_for("players"))
+        return redirect(url_for("jugadores"))
 
-    return render_template("edit_player.html", player=player)
+    return render_template("editar_jugador.html", jugador=jugador)
 
 
-@app.route("/players/delete/<int:id>")
-def delete_player(id):
-    player = Player.query.get_or_404(id)
-    nickname = player.nickname
+@app.route("/jugadores/eliminar/<int:id>")
+def eliminar_jugador(id):
+    jugador = Jugador.query.get_or_404(id)
+    nickname = jugador.nickname
 
-    db.session.delete(player)
+    db.session.delete(jugador)
     db.session.commit()
 
     # Redis
     redis.zrem("ranking", nickname)
     redis.delete(f"player:{id}")
 
-    return redirect(url_for("players"))
+    return redirect(url_for("jugadores"))
 
 
-@app.route("/score/<nickname>")
-def score(nickname):
+@app.route("/puntaje/<nickname>")
+def puntaje(nickname):
     redis.zincrby("ranking", 10, nickname)
     
     # Obtenemos el ranking actualizado de Redis

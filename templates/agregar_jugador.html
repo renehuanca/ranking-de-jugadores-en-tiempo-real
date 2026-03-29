@@ -8,7 +8,7 @@
     <form method="POST">
         <div class="mb-3">
             <label class="form-label">Nombre</label>
-            <input type="text" name="name" class="form-control" required>
+            <input type="text" name="nombre" class="form-control" required>
         </div>
 
         <div class="mb-3">
@@ -18,7 +18,7 @@
 
         <div class="mt-4">
             <button type="submit" class="btn btn-primary">Guardar</button>
-            <a href="/players" class="btn btn-light border ms-2">Cancelar</a>
+            <a href="{{ url_for('jugadores') }}" class="btn btn-light border ms-2">Cancelar</a>
         </div>
     </form>
 </div>

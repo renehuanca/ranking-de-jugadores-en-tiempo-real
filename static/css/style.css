@@ -7,6 +7,12 @@
     transition: transform 0.35s ease, background-color 0.35s ease, opacity 0.35s ease;
 }
 
+.ranking-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
 .ranking-card.moved-up {
     background-color: rgba(46, 125, 50, 0.12);
 }
@@ -22,4 +28,34 @@
 .ranking-card .badge {
     min-width: 70px;
     text-align: center;
+}
+#ranking-container .ranking-card {
+    position: relative;
+    padding-left: 68px;
+}
+
+#ranking-container .ranking-card::before {
+    content: "";
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    width: 100px;
+    height: 100px;
+    transform: translateY(-50%);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#ranking-container .ranking-card:nth-child(1)::before {
+    background-image: url("/static/img/oro.png");
+}
+#ranking-container .ranking-card:nth-child(2)::before {
+    background-image: url("/static/img/plata.png");
+}
+#ranking-container .ranking-card:nth-child(3)::before {
+    background-image: url("/static/img/bronce.png");
+}
+#ranking-container .ranking-card:nth-child(n+4)::before {
+    background-image: url("/static/img/otros.png");
 }

@@ -5,6 +5,7 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 
+# configuracion de postgres
 app.config["SECRET_KEY"] = "secret!"
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@localhost/gaming"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

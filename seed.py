@@ -4,12 +4,12 @@ import random
 def seed():
     with app.app_context():
         jugadores_demo = [
-            ("Diego Ramos", "ShadowKiller"),
-            ("Valeria Cruz", "LunaSniper"),
-            ("Andrés Vega", "xXDarkSoulXx"),
+            ("Diego Ramos", "Shadow"),
+            ("Valeria Cruz", "Luna"),
+            ("Andrés Vega", "DarkSoul"),
             ("Camila Ortiz", "PixelQueen"),
-            ("Javier Flores", "NoScopeGod"),
-            ("Ricardo Méndez", "GhostRider77")
+            ("Javier Flores", "NoScopePro"),
+            ("Ricardo Méndez", "GhostRider"),
         ]
 
         for nombre, nickname in jugadores_demo:

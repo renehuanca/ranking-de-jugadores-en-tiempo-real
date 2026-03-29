@@ -2,23 +2,25 @@
 
 {% block content %}
 
-<h2>Editar Jugador</h2>
+<div class="card p-4 shadow-sm border-0" style="max-width: 600px;">
+    <h2 class="mb-4 fs-3">Editar Jugador</h2>
 
-<form action="{{ url_for('editar_jugador', id=jugador.id) }}" method="POST">
+    <form action="{{ url_for('editar_jugador', id=jugador.id) }}" method="POST">
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" value="{{ jugador.nombre }}" required>
+        </div>
 
-    <label>Nombre</label><br>
-    <input type="text" name="nombre" value="{{ jugador.nombre }}" required>
+        <div class="mb-3">
+            <label class="form-label">Nickname</label>
+            <input type="text" name="nickname" class="form-control" value="{{ jugador.nickname }}" required>
+        </div>
 
-    <br><br>
-
-    <label>Nickname</label><br>
-    <input type="text" name="nickname" value="{{ jugador.nickname }}" required>
-
-    <br><br>
-
-    <button type="submit">Actualizar</button>
-    <a href="{{ url_for('jugadores') }}">Cancelar</a>
-
-</form>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <a href="{{ url_for('jugadores') }}" class="btn btn-light border ms-2">Cancelar</a>
+        </div>
+    </form>
+</div>
 
 {% endblock %}

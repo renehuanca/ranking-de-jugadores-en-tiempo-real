@@ -2,12 +2,13 @@ const socket = io();
 
 function createCard(player, score, position) {
     const card = document.createElement('div');
-    card.className = 'card ranking-card mb-2 p-3 d-flex flex-row justify-content-between align-items-center shadow-sm';
+    card.className = 'card ranking-card mb-2 p-4 d-flex flex-row justify-content-between align-items-center shadow-sm';
+    card.style.setProperty('padding-left', '100px', 'important');
     card.dataset.player = player;
     card.innerHTML = `
         <div class="fw-bold">#${position}</div>
         <div class="flex-grow-1 ms-3">${player}</div>
-        <div class="badge bg-primary fs-6">${score} puntos</div>`;
+        <div class="badge bg-primary fs-5">${score} puntos</div>`;
     return card;
 }
 
@@ -36,6 +37,15 @@ function updateRankingList(data) {
         }
 
         return createCard(player, score, position);
+    });
+
+    const newPlayers = new Set(data.ranking.map(item => item[0]));
+
+    oldCards.forEach(card => {
+        const player = card.dataset.player;
+        if (!newPlayers.has(player)) {
+            card.remove(); // 🔥 AQUÍ se elimina del DOM
+        }
     });
 
     // Asegurar que los elementos existentes se reordenen correctamente

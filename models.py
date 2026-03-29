@@ -8,7 +8,7 @@ class Jugador(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
-    nickname = db.Column(db.String(100), unique=True, nullable=False)
+    nickname = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):
         return f"<Jugador {self.nickname}>"

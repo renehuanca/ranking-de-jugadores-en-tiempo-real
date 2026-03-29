@@ -21,8 +21,17 @@ redis = redis_lib.Redis(host="localhost", port=6379, decode_responses=True)
 
 @app.route("/")
 def home():
+    # Contador de visitas
+    redis.incr("visitas")
+    visitas = redis.get("visitas")
+
+    # Usuarios online
+    ip = request.remote_addr
+    redis.set(f"online:{ip}", 1, ex=30)
+    usuarios_online = len(redis.keys("online:*"))
+
     ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
-    return render_template("ranking.html", ranking=ranking)
+    return render_template("ranking.html", ranking=ranking, visitas=visitas, usuarios_online=usuarios_online)
 
 @app.route("/jugadores")
 def jugadores():
@@ -75,6 +84,8 @@ def editar_jugador(id):
             "nombre": jugador.nombre,
             "nickname": jugador.nickname
         })
+        updated_ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
+        socketio.emit('update_ranking', {'ranking': updated_ranking})
 
         return redirect(url_for("jugadores"))
 

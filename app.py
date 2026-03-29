@@ -44,6 +44,8 @@ def agregar_jugador():
             "nombre": nombre,
             "nickname": nickname
         })
+        updated_ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
+        socketio.emit('update_ranking', {'ranking': updated_ranking})
 
         return redirect(url_for("jugadores"))
 
@@ -55,9 +57,17 @@ def editar_jugador(id):
     jugador = Jugador.query.get_or_404(id)
 
     if request.method == "POST":
+        antiguo_nickname = jugador.nickname
+
         jugador.nombre = request.form["nombre"]
         jugador.nickname = request.form["nickname"]
         db.session.commit()
+
+        # Actualizar Redis correctamente
+        score = redis.zscore("ranking", antiguo_nickname) or 0
+
+        redis.zrem("ranking", antiguo_nickname)
+        redis.zadd("ranking", {jugador.nickname: score})
 
         # Redis
         redis.hset(f"player:{jugador.id}", mapping={
@@ -81,6 +91,8 @@ def eliminar_jugador(id):
     # Redis
     redis.zrem("ranking", nickname)
     redis.delete(f"player:{id}")
+    updated_ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
+    socketio.emit('update_ranking', {'ranking': updated_ranking})
 
     return redirect(url_for("jugadores"))
 
@@ -91,7 +103,7 @@ def agregar_puntaje():
 
 @app.route("/puntaje/<nickname>")
 def puntaje(nickname):
-    redis.zincrby("ranking", 10, nickname)
+    redis.zincrby("ranking", 1, nickname)
     
     # Obtenemos el ranking actualizado de Redis
     updated_ranking = redis.zrevrange("ranking", 0, -1, withscores=True)

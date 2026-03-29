@@ -1,0 +1,85 @@
+const socket = io();
+
+function createCard(player, score, position) {
+    const card = document.createElement('div');
+    card.className = 'card ranking-card mb-2 p-3 d-flex flex-row justify-content-between align-items-center shadow-sm';
+    card.dataset.player = player;
+    card.innerHTML = `
+        <div class="fw-bold">#${position}</div>
+        <div class="flex-grow-1 ms-3">${player}</div>
+        <div class="badge bg-primary fs-6">${score} pts</div>`;
+    return card;
+}
+
+function updateRankingList(data) {
+    const container = document.getElementById('ranking-container');
+    const oldCards = Array.from(container.querySelectorAll('.ranking-card'));
+    const oldIndex = new Map();
+    const oldPositions = new Map();
+
+    oldCards.forEach((card, index) => {
+        const player = card.dataset.player;
+        oldIndex.set(player, index);
+        oldPositions.set(player, card.getBoundingClientRect().top);
+    });
+
+    const newCards = data.ranking.map((item, index) => {
+        const player = item[0];
+        const score = parseInt(item[1], 10);
+        const existing = oldCards.find(card => card.dataset.player === player);
+        const position = index + 1;
+
+        if (existing) {
+            existing.querySelector('.fw-bold').textContent = `#${position}`;
+            existing.querySelector('.badge').textContent = `${score} pts`;
+            return existing;
+        }
+
+        return createCard(player, score, position);
+    });
+
+    // Asegurar que los elementos existentes se reordenen correctamente
+    newCards.forEach(card => container.appendChild(card));
+
+    // FLIP animation
+    newCards.forEach((card, index) => {
+        const player = card.dataset.player;
+        const oldTop = oldPositions.get(player);
+        if (oldTop !== undefined) {
+            const newTop = card.getBoundingClientRect().top;
+            const delta = oldTop - newTop;
+            if (delta) {
+                card.style.transition = 'none';
+                card.style.transform = `translateY(${delta}px)`;
+            }
+        }
+    });
+
+    // Forzar reflow
+    container.offsetHeight;
+
+    newCards.forEach((card, index) => {
+        const player = card.dataset.player;
+        card.style.transition = 'transform 0.35s ease, background-color 0.35s ease';
+        card.style.transform = '';
+
+        const previousIndex = oldIndex.get(player);
+        if (previousIndex !== undefined) {
+            if (index < previousIndex) {
+                card.classList.add('moved-up');
+            } else if (index > previousIndex) {
+                card.classList.add('moved-down');
+            }
+        } else {
+            card.classList.add('moved-up');
+        }
+
+        setTimeout(() => {
+            card.classList.remove('moved-up', 'moved-down');
+        }, 800);
+    });
+}
+
+socket.on('update_ranking', function(data) {
+    updateRankingList(data);
+});

@@ -4,15 +4,18 @@ import redis as redis_lib
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
+
 app.config["SECRET_KEY"] = "secret!"
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@localhost/gaming"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-socketio = SocketIO(app, cors_allowed_origins='*')
+
 db.init_app(app)
+socketio = SocketIO(app, cors_allowed_origins='*')
 
 with app.app_context():
     db.create_all()
 
+# Configuración de Redis
 redis = redis_lib.Redis(host="localhost", port=6379, decode_responses=True)
 
 @app.route("/")

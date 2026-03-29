@@ -84,6 +84,10 @@ def eliminar_jugador(id):
 
     return redirect(url_for("jugadores"))
 
+@app.route("/agregar_puntaje")
+def agregar_puntaje():
+    jugadores = Jugador.query.all()
+    return render_template("agregar_puntaje.html", jugadores=jugadores)
 
 @app.route("/puntaje/<nickname>")
 def puntaje(nickname):

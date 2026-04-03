@@ -28,12 +28,12 @@
                     <span class="badge bg-secondary text-uppercase">{{ p.nickname }}</span>
                 </td>
                 <td class="text-end">
-                    <a href="{{ url_for('editar_jugador', id=p.id) }}" class="btn btn-sm btn-dark me-1">
+                    <a href="{{ url_for('editar_jugador', id=p._id) }}" class="btn btn-sm btn-dark me-1">
                         Editar
                     </a>
-                    <a href="{{ url_for('eliminar_jugador', id=p.id) }}" 
-                       class="btn btn-sm btn-danger" 
-                       onclick="return confirm('¿Estás seguro de eliminar a este jugador?')">
+                    <a href="{{ url_for('eliminar_jugador', id=p._id) }}" 
+                    class="btn btn-sm btn-danger" 
+                    onclick="return confirm('¿Estás seguro de eliminar a este jugador?')">
                         Eliminar
                     </a>
                 </td>

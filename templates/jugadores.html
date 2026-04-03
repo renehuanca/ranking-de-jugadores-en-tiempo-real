@@ -16,31 +16,35 @@
                 <th scope="col" style="width: 80px;">ID</th>
                 <th scope="col">Nombre Real</th>
                 <th scope="col">Nickname</th>
+                <th scope="col">Juego</th>
                 <th scope="col" class="text-end">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for p in jugadores %}
             <tr>
-                <th scope="row" class="text-muted">{{ p._id }}</th>
+                <th scope="row" class="text-muted small">{{ p._id }}</th>
                 <td>{{ p.nombre }}</td>
                 <td>
                     <span class="badge bg-secondary text-uppercase">{{ p.nickname }}</span>
+                </td>
+                <td>
+                    <span class="text-primary fw-bold">{{ p.juego }}</span>
                 </td>
                 <td class="text-end">
                     <a href="{{ url_for('editar_jugador', id=p._id) }}" class="btn btn-sm btn-dark me-1">
                         Editar
                     </a>
                     <a href="{{ url_for('eliminar_jugador', id=p._id) }}" 
-                    class="btn btn-sm btn-danger" 
-                    onclick="return confirm('¿Estás seguro de eliminar a este jugador?')">
+                       class="btn btn-sm btn-danger" 
+                       onclick="return confirm('¿Estás seguro de eliminar a este jugador?')">
                         Eliminar
                     </a>
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="4" class="text-center py-4 text-muted">
+                <td colspan="5" class="text-center py-4 text-muted">
                     No hay jugadores registrados todavía.
                 </td>
             </tr>

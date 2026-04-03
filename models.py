@@ -3,8 +3,9 @@ from bson.objectid import ObjectId
 
 class Jugador:
     @staticmethod
-    def esquema(nombre, nickname):
+    def esquema(nombre, nickname, juego):
         return {
             "nombre": nombre,
-            "nickname": nickname
+            "nickname": nickname,
+            "juego": juego
         }

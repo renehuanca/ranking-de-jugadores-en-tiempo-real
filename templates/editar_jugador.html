@@ -5,15 +5,20 @@
 <div class="card p-4 shadow-sm border-0" style="max-width: 600px;">
     <h2 class="mb-4 fs-3">Editar Jugador</h2>
 
-    <form action="{{ url_for('editar_jugador', id=jugador._id) }}" method="POST">
+    <form action="{{ url_for('editar_jugador', id=jugador['_id']) }}" method="POST">
         <div class="mb-3">
             <label class="form-label">Nombre</label>
-            <input type="text" name="nombre" class="form-control" value="{{ jugador.nombre }}" required>
+            <input type="text" name="nombre" class="form-control" value="{{ jugador['nombre'] }}" required>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Nickname</label>
-            <input type="text" name="nickname" class="form-control" value="{{ jugador.nickname }}" required>
+            <input type="text" name="nickname" class="form-control" value="{{ jugador['nickname'] }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Juego</label>
+            <input type="text" name="juego" class="form-control" value="{{ jugador['juego'] }}" required>
         </div>
 
         <div class="mt-4">

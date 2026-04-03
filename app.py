@@ -7,13 +7,14 @@ from flask_socketio import SocketIO, emit
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
 
-# --- CONFIGURACIÓN DE PYMONGO DIRECTO ---
+# --- CONFIGURACIÓN DE PYMONGO ---
 client = MongoClient("mongodb://localhost:27017/")
 db_mongo = client["gaming"] 
-# Colección explícita
 jugadores_col = db_mongo.jugadores 
 
 socketio = SocketIO(app, cors_allowed_origins='*')
+
+# --- CONFIGURACIÓN DE REDIS ---
 redis = redis_lib.Redis(host="localhost", port=6379, decode_responses=True)
 
 @app.route("/")
@@ -30,7 +31,6 @@ def home():
 
 @app.route("/jugadores")
 def jugadores():
-    # .find() devuelve un cursor, lo convertimos a lista
     lista_jugadores = list(jugadores_col.find())
     return render_template("jugadores.html", jugadores=lista_jugadores)
 
@@ -39,13 +39,22 @@ def agregar_jugador():
     if request.method == "POST":
         nombre = request.form["nombre"]
         nickname = request.form["nickname"]
+        juego = request.form["juego"]
 
-        nuevo_jugador = {"nombre": nombre, "nickname": nickname}
+        nuevo_jugador = {
+            "nombre": nombre, 
+            "nickname": nickname,
+            "juego": juego
+        }
         result = jugadores_col.insert_one(nuevo_jugador)
         player_id = str(result.inserted_id)
 
-        # Sincronización con Redis
-        redis.hset(f"player:{player_id}", mapping={"nombre": nombre, "nickname": nickname})
+        # Sincronización con Redis: Agregamos "juego" al hash
+        redis.hset(f"player:{player_id}", mapping={
+            "nombre": nombre, 
+            "nickname": nickname,
+            "juego": juego
+        })
         redis.zadd("ranking", {nickname: 0})
         
         updated_ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
@@ -56,7 +65,6 @@ def agregar_jugador():
 
 @app.route("/jugadores/editar/<id>", methods=["GET", "POST"])
 def editar_jugador(id):
-    # Reemplazo de find_one_or_404
     jugador = jugadores_col.find_one({"_id": ObjectId(id)})
     if not jugador:
         abort(404)
@@ -65,18 +73,29 @@ def editar_jugador(id):
         antiguo_nickname = jugador["nickname"]
         nuevo_nombre = request.form["nombre"]
         nuevo_nickname = request.form["nickname"]
+        nuevo_juego = request.form["juego"]
 
+        # Actualizar en MongoDB
         jugadores_col.update_one(
             {"_id": ObjectId(id)},
-            {"$set": {"nombre": nuevo_nombre, "nickname": nuevo_nickname}}
+            {"$set": {
+                "nombre": nuevo_nombre, 
+                "nickname": nuevo_nickname,
+                "juego": nuevo_juego
+            }}
         )
 
-        # Lógica de Redis para actualizar nickname en el ranking
+        # Lógica de Redis
         score = redis.zscore("ranking", antiguo_nickname) or 0
         redis.zrem("ranking", antiguo_nickname)
         redis.zadd("ranking", {nuevo_nickname: score})
 
-        redis.hset(f"player:{id}", mapping={"nombre": nuevo_nombre, "nickname": nuevo_nickname})
+        # Actualizar el Hash en Redis
+        redis.hset(f"player:{id}", mapping={
+            "nombre": nuevo_nombre, 
+            "nickname": nuevo_nickname,
+            "juego": nuevo_juego
+        })
         
         updated_ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
         socketio.emit('update_ranking', {'ranking': updated_ranking})
@@ -94,7 +113,6 @@ def eliminar_jugador(id):
     nickname = jugador["nickname"]
     jugadores_col.delete_one({"_id": ObjectId(id)})
 
-    # Limpieza en Redis
     redis.zrem("ranking", nickname)
     redis.delete(f"player:{id}")
     

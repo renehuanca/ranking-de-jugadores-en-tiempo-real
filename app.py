@@ -19,13 +19,16 @@ redis = redis_lib.Redis(host="localhost", port=6379, decode_responses=True)
 
 @app.route("/")
 def home():
+    # Incrementa el contador global de visitas (String)
     redis.incr("visitas")
     visitas = redis.get("visitas")
     
+    # Registra IP con expiración de 30s para conteo de usuarios online
     ip = request.remote_addr
     redis.set(f"online:{ip}", 1, ex=30)
     usuarios_online = len(redis.keys("online:*"))
 
+    # Recupera el ranking completo del Sorted Set (ZSET) de mayor a menor
     ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
     return render_template("ranking.html", ranking=ranking, visitas=visitas, usuarios_online=usuarios_online)
 
@@ -49,12 +52,13 @@ def agregar_jugador():
         result = jugadores_col.insert_one(nuevo_jugador)
         player_id = str(result.inserted_id)
 
-        # Sincronización con Redis: Agregamos "juego" al hash
+        # Almacena el perfil del jugador en un Hash (HSET)
         redis.hset(f"player:{player_id}", mapping={
             "nombre": nombre, 
             "nickname": nickname,
             "juego": juego
         })
+        # Inicializa al jugador en el ranking con puntaje 0 (ZSET)
         redis.zadd("ranking", {nickname: 0})
         
         updated_ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
@@ -75,7 +79,6 @@ def editar_jugador(id):
         nuevo_nickname = request.form["nickname"]
         nuevo_juego = request.form["juego"]
 
-        # Actualizar en MongoDB
         jugadores_col.update_one(
             {"_id": ObjectId(id)},
             {"$set": {
@@ -85,12 +88,12 @@ def editar_jugador(id):
             }}
         )
 
-        # Lógica de Redis
+        # Mantiene el puntaje actual al cambiar el nickname en el ranking
         score = redis.zscore("ranking", antiguo_nickname) or 0
-        redis.zrem("ranking", antiguo_nickname)
-        redis.zadd("ranking", {nuevo_nickname: score})
+        redis.zrem("ranking", antiguo_nickname) # Elimina el miembro antiguo
+        redis.zadd("ranking", {nuevo_nickname: score}) # Agrega el nuevo miembro
 
-        # Actualizar el Hash en Redis
+        # Actualiza los datos del perfil en el Hash
         redis.hset(f"player:{id}", mapping={
             "nombre": nuevo_nombre, 
             "nickname": nuevo_nickname,
@@ -113,6 +116,7 @@ def eliminar_jugador(id):
     nickname = jugador["nickname"]
     jugadores_col.delete_one({"_id": ObjectId(id)})
 
+    # Elimina al jugador del ranking (ZSET) y borra su Hash de perfil
     redis.zrem("ranking", nickname)
     redis.delete(f"player:{id}")
     
@@ -128,7 +132,9 @@ def agregar_puntaje():
 
 @app.route("/puntaje/<nickname>")
 def puntaje(nickname):
+    # Incrementa en 1 el puntaje del jugador en el ranking (ZSET)
     redis.zincrby("ranking", 1, nickname)
+    
     updated_ranking = redis.zrevrange("ranking", 0, -1, withscores=True)
     socketio.emit('update_ranking', {'ranking': updated_ranking})
     return redirect(request.referrer or url_for('home'))

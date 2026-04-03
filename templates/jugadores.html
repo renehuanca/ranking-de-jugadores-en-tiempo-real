@@ -13,7 +13,7 @@
     <table class="table align-middle">
         <thead class="table-light">
             <tr>
-                <th scope="col" style="width: 80px;">ID</th>
+                <th scope="col" style="width: 80px;">#</th>
                 <th scope="col">Nombre Real</th>
                 <th scope="col">Nickname</th>
                 <th scope="col">Juego</th>
@@ -23,7 +23,7 @@
         <tbody>
             {% for p in jugadores %}
             <tr>
-                <th scope="row" class="text-muted small">{{ p._id }}</th>
+                <th scope="row" class="text-muted small">{{ loop.index }}</th>
                 <td>{{ p.nombre }}</td>
                 <td>
                     <span class="badge bg-secondary text-uppercase">{{ p.nickname }}</span>

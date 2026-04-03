@@ -8,14 +8,31 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
 
 # --- CONFIGURACIÓN DE PYMONGO ---
-client = MongoClient("mongodb://localhost:27017/")
+# client = MongoClient("mongodb://localhost:27017/")
+# db_mongo = client["gaming"] 
+# jugadores_col = db_mongo.jugadores 
+
+
+# --- CONFIGURACIÓN DE PYMONGO CON MONGO ATLAS ---
+uri = "mongodb+srv://rene:tD5yilOZQdzomS9H@cluster0.ihhkwwy.mongodb.net/"
+client = MongoClient(uri)
 db_mongo = client["gaming"] 
-jugadores_col = db_mongo.jugadores 
+jugadores_col = db_mongo.jugadores
 
-socketio = SocketIO(app, cors_allowed_origins='*')
+#socketio = SocketIO(app, cors_allowed_origins='*')
+socketio = SocketIO(
+    app,
+    cors_allowed_origins='*',
+    message_queue='rediss://default:AQ_tAAImcDI2NjBmMjBiOGE5OWI0ZWQ1YmM5NThlNGJhNWRkNDNlOHAyNDA3Nw@uncommon-oyster-4077.upstash.io:6379',
+    async_mode='threading'
+)
 
-# --- CONFIGURACIÓN DE REDIS ---
-redis = redis_lib.Redis(host="localhost", port=6379, decode_responses=True)
+# --- CONFIGURACIÓN DE REDIS (Local) ---
+# redis = redis_lib.Redis(host="localhost", port=6379, decode_responses=True)
+
+# --- CONFIGURACIÓN DE REDIS (UPSTASH) ---
+url = "rediss://default:AQ_tAAImcDI2NjBmMjBiOGE5OWI0ZWQ1YmM5NThlNGJhNWRkNDNlOHAyNDA3Nw@uncommon-oyster-4077.upstash.io:6379"
+redis = redis_lib.from_url(url, decode_responses=True)
 
 @app.route("/")
 def home():
